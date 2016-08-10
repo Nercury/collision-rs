@@ -39,17 +39,11 @@ impl<S> MinMax for Point2<S>
     where S: BaseNum
 {
     fn min(a: Point2<S>, b: Point2<S>) -> Point2<S> {
-        Point2::new(
-            a.x.partial_min(b.x),
-            a.y.partial_min(b.y)
-        )
+        Point2::new(a.x.partial_min(b.x), a.y.partial_min(b.y))
     }
 
     fn max(a: Point2<S>, b: Point2<S>) -> Point2<S> {
-        Point2::new(
-            a.x.partial_max(b.x),
-            a.y.partial_max(b.y)
-        )
+        Point2::new(a.x.partial_max(b.x), a.y.partial_max(b.y))
     }
 }
 
@@ -57,23 +51,21 @@ impl<S> MinMax for Point3<S>
     where S: BaseNum
 {
     fn min(a: Point3<S>, b: Point3<S>) -> Point3<S> {
-        Point3::new(
-            a.x.partial_min(b.x),
-            a.y.partial_min(b.y),
-            a.z.partial_min(b.z)
-        )
+        Point3::new(a.x.partial_min(b.x),
+                    a.y.partial_min(b.y),
+                    a.z.partial_min(b.z))
     }
 
     fn max(a: Point3<S>, b: Point3<S>) -> Point3<S> {
-        Point3::new(
-            a.x.partial_max(b.x),
-            a.y.partial_max(b.y),
-            a.z.partial_max(b.z)
-        )
+        Point3::new(a.x.partial_max(b.x),
+                    a.y.partial_max(b.y),
+                    a.z.partial_max(b.z))
     }
 }
 
-pub trait Aabb<S: BaseNum, V: VectorSpace<Scalar=S> + ElementWise + Array<Element=S>, P: EuclideanSpace<Scalar=S, Diff=V>>: Sized {
+pub trait Aabb<S: BaseNum,
+               V: VectorSpace<Scalar = S> + ElementWise + Array<Element = S>,
+               P: EuclideanSpace<Scalar = S, Diff = V>>: Sized {
     /// Create a new AABB using two points as opposing corners.
     fn new(p1: P, p2: P) -> Self;
 
@@ -85,11 +77,15 @@ pub trait Aabb<S: BaseNum, V: VectorSpace<Scalar=S> + ElementWise + Array<Elemen
 
     /// Return the dimensions of this AABB.
     #[inline]
-    fn dim(&self) -> V { self.max() - self.min() }
+    fn dim(&self) -> V {
+        self.max() - self.min()
+    }
 
     /// Return the volume this AABB encloses.
     #[inline]
-    fn volume(&self) -> S { self.dim().product() }
+    fn volume(&self) -> S {
+        self.dim().product()
+    }
 
     /// Return the center point of this AABB.
     #[inline]
@@ -107,10 +103,7 @@ pub trait Aabb<S: BaseNum, V: VectorSpace<Scalar=S> + ElementWise + Array<Elemen
     fn grow(&self, p: P) -> Self
         where P: MinMax
     {
-        Aabb::new(
-            MinMax::min(self.min(), p),
-            MinMax::max(self.max(), p)
-        )
+        Aabb::new(MinMax::min(self.min(), p), MinMax::max(self.max(), p))
     }
 
     /// Add a vector to every point in the AABB, returning a new AABB.
@@ -144,10 +137,8 @@ impl<S: BaseNum> Aabb2<S> {
     #[inline]
     pub fn new(p1: Point2<S>, p2: Point2<S>) -> Aabb2<S> {
         Aabb2 {
-            min: Point2::new(p1.x.partial_min(p2.x),
-                             p1.y.partial_min(p2.y)),
-            max: Point2::new(p1.x.partial_max(p2.x),
-                             p1.y.partial_max(p2.y)),
+            min: Point2::new(p1.x.partial_min(p2.x), p1.y.partial_min(p2.y)),
+            max: Point2::new(p1.x.partial_max(p2.x), p1.y.partial_max(p2.y)),
         }
     }
 
@@ -155,28 +146,33 @@ impl<S: BaseNum> Aabb2<S> {
     #[inline]
     pub fn to_corners(&self) -> [Point2<S>; 4] {
         [self.min,
-        Point2::new(self.max.x, self.min.y),
-        Point2::new(self.min.x, self.max.y),
-        self.max]
+         Point2::new(self.max.x, self.min.y),
+         Point2::new(self.min.x, self.max.y),
+         self.max]
     }
 }
 
 impl<S: BaseNum> Aabb<S, Vector2<S>, Point2<S>> for Aabb2<S> {
     #[inline]
-    fn new(p1: Point2<S>, p2: Point2<S>) -> Aabb2<S> { Aabb2::new(p1, p2) }
+    fn new(p1: Point2<S>, p2: Point2<S>) -> Aabb2<S> {
+        Aabb2::new(p1, p2)
+    }
 
     #[inline]
-    fn min(&self) -> Point2<S> { self.min }
+    fn min(&self) -> Point2<S> {
+        self.min
+    }
 
     #[inline]
-    fn max(&self) -> Point2<S> { self.max }
+    fn max(&self) -> Point2<S> {
+        self.max
+    }
 
     #[inline]
     fn contains(&self, p: Point2<S>) -> bool {
         let v_min = p - self.min();
         let v_max = self.max() - p;
-        v_min.x >= S::zero() && v_min.y >= S::zero() &&
-        v_max.x >  S::zero() && v_max.y >  S::zero()
+        v_min.x >= S::zero() && v_min.y >= S::zero() && v_max.x > S::zero() && v_max.y > S::zero()
     }
 }
 
@@ -212,32 +208,38 @@ impl<S: BaseNum> Aabb3<S> {
     #[inline]
     pub fn to_corners(&self) -> [Point3<S>; 8] {
         [self.min,
-        Point3::new(self.max.x, self.min.y, self.min.z),
-        Point3::new(self.min.x, self.max.y, self.min.z),
-        Point3::new(self.max.x, self.max.y, self.min.z),
-        Point3::new(self.min.x, self.min.y, self.max.z),
-        Point3::new(self.max.x, self.min.y, self.max.z),
-        Point3::new(self.min.x, self.max.y, self.max.z),
-        self.max]
+         Point3::new(self.max.x, self.min.y, self.min.z),
+         Point3::new(self.min.x, self.max.y, self.min.z),
+         Point3::new(self.max.x, self.max.y, self.min.z),
+         Point3::new(self.min.x, self.min.y, self.max.z),
+         Point3::new(self.max.x, self.min.y, self.max.z),
+         Point3::new(self.min.x, self.max.y, self.max.z),
+         self.max]
     }
 }
 
 impl<S: BaseNum> Aabb<S, Vector3<S>, Point3<S>> for Aabb3<S> {
     #[inline]
-    fn new(p1: Point3<S>, p2: Point3<S>) -> Aabb3<S> { Aabb3::new(p1, p2) }
+    fn new(p1: Point3<S>, p2: Point3<S>) -> Aabb3<S> {
+        Aabb3::new(p1, p2)
+    }
 
     #[inline]
-    fn min(&self) -> Point3<S> { self.min }
+    fn min(&self) -> Point3<S> {
+        self.min
+    }
 
     #[inline]
-    fn max(&self) -> Point3<S> { self.max }
+    fn max(&self) -> Point3<S> {
+        self.max
+    }
 
     #[inline]
     fn contains(&self, p: Point3<S>) -> bool {
         let v_min = p - self.min();
         let v_max = self.max() - p;
         v_min.x >= S::zero() && v_min.y >= S::zero() && v_min.z >= S::zero() &&
-        v_max.x >  S::zero() && v_max.y >  S::zero() && v_max.z >  S::zero()
+        v_max.x > S::zero() && v_max.y > S::zero() && v_max.z > S::zero()
     }
 }
 
@@ -270,18 +272,15 @@ impl<S: BaseFloat> Intersect<Option<Point2<S>>> for (Ray2<S>, Aabb2<S>) {
 
         if tmin < S::zero() && tmax < S::zero() {
             None
-        }
-        else if tmax >= tmin {
+        } else if tmax >= tmin {
             if tmin >= S::zero() {
                 Some(Point2::new(ray.origin.x + ray.direction.x * tmin,
                                  ray.origin.y + ray.direction.y * tmin))
-            }
-            else {
+            } else {
                 Some(Point2::new(ray.origin.x + ray.direction.x * tmax,
                                  ray.origin.y + ray.direction.y * tmax))
             }
-        }
-        else {
+        } else {
             None
         }
     }
@@ -292,46 +291,35 @@ impl<S: BaseFloat> Intersect<Option<Point3<S>>> for (Ray3<S>, Aabb3<S>) {
     fn intersection(&self) -> Option<Point3<S>> {
         let (ref ray, ref aabb) = *self;
 
-        let mut tmin = S::neg_infinity();
-        let mut tmax = S::infinity();
+        let inv_dir = Vector3::new(S::one(), S::one(), S::one()).div_element_wise(ray.direction);
 
-        if ray.direction.x != S::zero() {
-            let tx1 = (aabb.min.x - ray.origin.x) / ray.direction.x;
-            let tx2 = (aabb.max.x - ray.origin.x) / ray.direction.x;
-            tmin = tmin.max(tx1.min(tx2));
-            tmax = tmax.min(tx1.max(tx2));
-        }
+        let mut t1 = (aabb.min.x - ray.origin.x) * inv_dir.x;
+        let mut t2 = (aabb.max.x - ray.origin.x) * inv_dir.x;
 
-        if ray.direction.y != S::zero() {
-            let ty1 = (aabb.min.y - ray.origin.y) / ray.direction.y;
-            let ty2 = (aabb.max.y - ray.origin.y) / ray.direction.y;
-            tmin = tmin.max(ty1.min(ty2));
-            tmax = tmax.min(ty1.max(ty2));
-        }
+        let mut tmin = t1.min(t2);
+        let mut tmax = t1.max(t2);
 
-        if ray.direction.z != S::zero() {
-            let tz1 = (aabb.min.z - ray.origin.z) / ray.direction.z;
-            let tz2 = (aabb.max.z - ray.origin.z) / ray.direction.z;
-            tmin = tmin.max(tz1.min(tz2));
-            tmax = tmax.min(tz1.max(tz2));
+        for i in 0..3 {
+            t1 = (aabb.min[i] - ray.origin[i]) * inv_dir[i];
+            t2 = (aabb.max[i] - ray.origin[i]) * inv_dir[i];
+
+            tmin = tmin.max(t1.min(t2));
+            tmax = tmax.min(t1.max(t2));
         }
 
         if tmin < S::zero() && tmax < S::zero() {
             None
-        }
-        else if tmax >= tmin {
+        } else if tmax >= tmin {
             if tmin >= S::zero() {
                 Some(Point3::new(ray.origin.x + ray.direction.x * tmin,
                                  ray.origin.y + ray.direction.y * tmin,
                                  ray.origin.z + ray.direction.z * tmin))
-            }
-            else {
+            } else {
                 Some(Point3::new(ray.origin.x + ray.direction.x * tmax,
                                  ray.origin.y + ray.direction.y * tmax,
                                  ray.origin.z + ray.direction.z * tmax))
             }
-        }
-        else {
+        } else {
             None
         }
     }
